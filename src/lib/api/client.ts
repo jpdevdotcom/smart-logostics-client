@@ -22,13 +22,18 @@ apiClient.interceptors.response.use(
   },
   (error: unknown) => {
     if (typeof error === 'object' && error) {
-      const errorRecord = error as { response?: { data?: unknown } }
-      const message = extractMessage(errorRecord.response?.data)
-      pushNotification({
-        title: 'Request failed',
-        message: message ?? 'Something went wrong. Please try again.',
-        tone: 'error',
-      })
+      const errorRecord = error as {
+        response?: { data?: unknown }
+        config?: { suppressGlobalError?: boolean }
+      }
+      if (!errorRecord.config?.suppressGlobalError) {
+        const message = extractMessage(errorRecord.response?.data)
+        pushNotification({
+          title: 'Request failed',
+          message: message ?? 'Something went wrong. Please try again.',
+          tone: 'error',
+        })
+      }
     } else {
       pushNotification({
         title: 'Request failed',

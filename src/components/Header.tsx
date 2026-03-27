@@ -6,27 +6,24 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur">
       <nav className="page-wrap flex flex-wrap items-center gap-4 px-4 py-4">
         <Link to="/" className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white">
             <PackageCheck className="h-5 w-5" />
           </span>
           Smart Logistics
         </Link>
 
         <div className="ml-auto flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-600">
-          <a href="#overview" className="nav-link">
+          <Link to="/" className="nav-link">
             Overview
-          </a>
-          <a href="#warehouses" className="nav-link">
+          </Link>
+          <Link to="/warehouses" className="nav-link">
             Warehouses
-          </a>
-          <a href="#inventory" className="nav-link">
+          </Link>
+          <Link to="/inventory" className="nav-link">
             Inventory
-          </a>
-          <a href="#movements" className="nav-link">
-            Movements
-          </a>
-          <Link to="/about" className="nav-link">
-            About API
+          </Link>
+          <Link to="/items" className="nav-link">
+            Items
           </Link>
         </div>
       </nav>

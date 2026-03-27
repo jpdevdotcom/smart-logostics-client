@@ -5,7 +5,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import '../styles.css'
 import Header from '#/components/Header'
 import Footer from '#/components/Footer'
-import Notifications from '#/components/Notifications'
+import { Toaster } from '#/components/ui/sonner'
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -15,7 +15,7 @@ function RootComponent() {
   return (
     <div className="app-shell">
       <Header />
-      <Notifications />
+      <Toaster position="top-right" />
       <Outlet />
       <Footer />
       <TanStackDevtools

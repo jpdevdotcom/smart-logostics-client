@@ -64,7 +64,7 @@ export function Combobox({
       <button
         type="button"
         className={cn(
-          'flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 text-left text-sm text-slate-700 shadow-sm transition hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200'
+          'flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 text-left text-sm text-slate-700 transition hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200'
         )}
         onClick={() => setOpen((prev) => !prev)}
       >
@@ -73,7 +73,7 @@ export function Combobox({
       </button>
 
       {open ? (
-        <div className="absolute z-40 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+        <div className="absolute z-40 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2">
           <div className="flex items-center gap-2 rounded-md border border-slate-200 px-2">
             <Search className="h-4 w-4 text-slate-400" />
             <Input
