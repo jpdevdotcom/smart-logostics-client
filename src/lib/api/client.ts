@@ -1,0 +1,42 @@
+import axios from 'axios'
+import { pushNotification } from '../notifications'
+import { API_BASE_URL } from './endpoints'
+import { extractMessage } from './helpers'
+
+export const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+})
+
+apiClient.interceptors.response.use(
+  (response) => {
+    const message = extractMessage(response.data)
+    if (message) {
+      pushNotification({
+        title: 'Server message',
+        message,
+        tone: 'success',
+      })
+    }
+    return response
+  },
+  (error: unknown) => {
+    if (typeof error === 'object' && error) {
+      const errorRecord = error as { response?: { data?: unknown } }
+      const message = extractMessage(errorRecord.response?.data)
+      pushNotification({
+        title: 'Request failed',
+        message: message ?? 'Something went wrong. Please try again.',
+        tone: 'error',
+      })
+    } else {
+      pushNotification({
+        title: 'Request failed',
+        message: 'Something went wrong. Please try again.',
+        tone: 'error',
+      })
+    }
+
+    return Promise.reject(error)
+  }
+)
