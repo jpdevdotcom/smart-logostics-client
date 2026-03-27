@@ -1,7 +1,13 @@
 import { apiClient } from './client'
 import { endpoints } from './endpoints'
 import { isRecord, pickNumber, pickString } from './helpers'
-import type { IntakeInput, InventoryItem, Movement, TransferInput, Warehouse } from './types'
+import type {
+  IntakeInput,
+  InventoryItem,
+  Movement,
+  TransferInput,
+  Warehouse,
+} from './types'
 
 type ReportItem = {
   itemId: number
@@ -35,7 +41,7 @@ type InventoryReportApi = {
 
 export async function getInventoryReport(
   page = 1,
-  limit = 50
+  limit = 50,
 ): Promise<{
   warehouses: Warehouse[]
   items: InventoryItem[]
@@ -70,7 +76,7 @@ export async function getInventoryReport(
       storageRequirement: item.storageRequirement,
       isPerishable: item.storageRequirement === 'COLD',
       status: item.lowStock ? 'Low stock' : 'In stock',
-    }))
+    })),
   )
 
   return { warehouses: mappedWarehouses, items, meta: report?.meta }
@@ -81,21 +87,15 @@ export async function getMovements(): Promise<Movement[]> {
 }
 
 export async function createTransfer(payload: TransferInput): Promise<void> {
-  await apiClient.post(endpoints.inventoryTransfer, payload, {
-    suppressGlobalError: true,
-  })
+  await apiClient.post(endpoints.inventoryTransfer, payload)
 }
 
 export async function createIntake(payload: IntakeInput): Promise<void> {
-  await apiClient.post(endpoints.inventoryAdd, payload, {
-    suppressGlobalError: true,
-  })
+  await apiClient.post(endpoints.inventoryAdd, payload)
 }
 
 export async function deleteWarehouse(id: number): Promise<void> {
-  await apiClient.delete(`${endpoints.warehouseById}/${id}`, {
-    suppressGlobalError: true,
-  })
+  await apiClient.delete(`${endpoints.warehouseById}/${id}`)
 }
 
 function parseReport(payload: unknown): InventoryReportApi | null {
@@ -106,11 +106,15 @@ function parseReport(payload: unknown): InventoryReportApi | null {
     data: data
       .map((entry) => (isRecord(entry) ? parseWarehouse(entry) : null))
       .filter((entry): entry is ReportWarehouse => Boolean(entry)),
-    meta: isRecord(payload.meta) ? (payload.meta as InventoryReportApi['meta']) : undefined,
+    meta: isRecord(payload.meta)
+      ? (payload.meta as InventoryReportApi['meta'])
+      : undefined,
   }
 }
 
-function parseWarehouse(record: Record<string, unknown>): ReportWarehouse | null {
+function parseWarehouse(
+  record: Record<string, unknown>,
+): ReportWarehouse | null {
   const warehouseId = pickNumber(record, ['warehouseId'])
   const name = pickString(record, ['name'])
   const location = pickString(record, ['location'])
@@ -119,12 +123,7 @@ function parseWarehouse(record: Record<string, unknown>): ReportWarehouse | null
   const currentOccupancy = pickNumber(record, ['currentOccupancy']) ?? 0
   const percentFull = pickNumber(record, ['percentFull']) ?? 0
 
-  if (
-    warehouseId === undefined ||
-    !name ||
-    !location ||
-    !type
-  ) {
+  if (warehouseId === undefined || !name || !location || !type) {
     return null
   }
 
