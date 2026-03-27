@@ -1,6 +1,7 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { Outlet, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { useEffect } from 'react'
 
 import '../styles.css'
 import Header from '#/components/Header'
@@ -12,6 +13,21 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      '/': 'Overview',
+      '/warehouses': 'Warehouses',
+      '/inventory': 'Inventory',
+      '/items': 'Items',
+    }
+    const suffix = titles[pathname] ?? 'Dashboard'
+    document.title = `Smart Logistics | ${suffix}`
+  }, [pathname])
+
   return (
     <div className="app-shell">
       <Header />
