@@ -135,14 +135,14 @@ function App() {
       const qty = item.quantity ?? 0
       return qty > 0 && qty <= 10
     }).length
-    const uniqueSkuCount = new Set(
+    const totalItemsCount = new Set(
       inventory
         .map((item) => item.itemId ?? item.sku)
         .filter((value): value is string | number => value !== undefined),
     ).size
     return {
       warehouses: warehouses.length,
-      totalSku: uniqueSkuCount,
+      totalItems: totalItemsCount,
       perishable: perishableCount,
       lowStock: lowStockCount,
     }
@@ -375,8 +375,8 @@ function App() {
             icon={<WarehouseIcon className="h-5 w-5" />}
           />
           <StatCard
-            title="Total SKUs"
-            value={totals.totalSku}
+            title="Total Items"
+            value={totals.totalItems}
             description="Unique products tracked"
             icon={<Boxes className="h-5 w-5" />}
           />
