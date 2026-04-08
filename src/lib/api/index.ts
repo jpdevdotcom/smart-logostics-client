@@ -87,15 +87,21 @@ export async function getMovements(): Promise<Movement[]> {
 }
 
 export async function createTransfer(payload: TransferInput): Promise<void> {
-  await apiClient.post(endpoints.inventoryTransfer, payload)
+  await apiClient.post(endpoints.inventoryTransfer, payload, {
+    suppressGlobalError: true,
+  })
 }
 
 export async function createIntake(payload: IntakeInput): Promise<void> {
-  await apiClient.post(endpoints.inventoryAdd, payload)
+  await apiClient.post(endpoints.inventoryAdd, payload, {
+    suppressGlobalError: true,
+  })
 }
 
 export async function deleteWarehouse(id: number): Promise<void> {
-  await apiClient.delete(`${endpoints.warehouseById}/${id}`)
+  await apiClient.delete(`${endpoints.warehouseById}/${id}`, {
+    suppressGlobalError: true,
+  })
 }
 
 function parseReport(payload: unknown): InventoryReportApi | null {

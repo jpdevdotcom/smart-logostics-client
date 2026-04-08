@@ -3,6 +3,12 @@ import { pushNotification } from '../notifications'
 import { API_BASE_URL } from './endpoints'
 import { extractMessage } from './helpers'
 
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    suppressGlobalError?: boolean
+  }
+}
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
 })

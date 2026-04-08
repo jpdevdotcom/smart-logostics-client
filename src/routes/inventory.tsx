@@ -1,11 +1,24 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import { getInventoryReport, type InventoryItem } from '#/lib/api'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '#/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '#/components/ui/table'
 import { Skeleton } from '#/components/ui/skeleton'
 
 type StorageFilter = 'all' | 'cold' | 'standard'
@@ -54,7 +67,7 @@ function InventoryPage() {
         (storageFilter === 'standard' && storage !== 'cold')
       const quantity = item.quantity ?? 0
       const matchesStock =
-        stockFilter === 'all' || (stockFilter === 'low' && quantity < 10)
+        stockFilter === 'all' || (stockFilter === 'low' && quantity <= 10)
       return matchesQuery && matchesStorage && matchesStock
     })
   }, [items, query, storageFilter, stockFilter])
@@ -76,7 +89,9 @@ function InventoryPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-end">
               <div className="grid gap-2">
-                <label className="text-xs font-semibold text-slate-600">Search</label>
+                <label className="text-xs font-semibold text-slate-600">
+                  Search
+                </label>
                 <Input
                   placeholder="Search item, SKU, or warehouse"
                   value={query}
@@ -125,7 +140,9 @@ function InventoryPage() {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <p className="text-sm text-slate-500">No inventory matches your filters.</p>
+              <p className="text-sm text-slate-500">
+                No inventory matches your filters.
+              </p>
             ) : (
               <Table>
                 <TableHeader>
@@ -143,12 +160,20 @@ function InventoryPage() {
                         <p className="font-semibold text-slate-900">
                           {item.name ?? 'Item'}
                         </p>
-                        <p className="text-xs text-slate-500">{item.sku ?? '—'}</p>
+                        <p className="text-xs text-slate-500">
+                          {item.sku ?? '—'}
+                        </p>
                       </TableCell>
                       <TableCell>{item.warehouseName ?? '—'}</TableCell>
                       <TableCell>{item.quantity ?? 0}</TableCell>
                       <TableCell>
-                        <Badge variant={item.storageRequirement === 'COLD' ? 'warning' : 'default'}>
+                        <Badge
+                          variant={
+                            item.storageRequirement === 'COLD'
+                              ? 'warning'
+                              : 'default'
+                          }
+                        >
                           {item.storageRequirement ?? 'STANDARD'}
                         </Badge>
                       </TableCell>
