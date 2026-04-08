@@ -18,7 +18,7 @@ export function getBoolean(value: unknown) {
 
 export function pickString(
   record: Record<string, unknown>,
-  keys: string[]
+  keys: string[],
 ): string | undefined {
   for (const key of keys) {
     const value = getString(record[key])
@@ -29,7 +29,7 @@ export function pickString(
 
 export function pickNumber(
   record: Record<string, unknown>,
-  keys: string[]
+  keys: string[],
 ): number | undefined {
   for (const key of keys) {
     const value = getNumber(record[key])
@@ -40,7 +40,7 @@ export function pickNumber(
 
 export function pickBoolean(
   record: Record<string, unknown>,
-  keys: string[]
+  keys: string[],
 ): boolean | undefined {
   for (const key of keys) {
     const value = getBoolean(record[key])
@@ -98,25 +98,50 @@ export function mapApiList<T>(payload: unknown, mapper: Mapper<T>): T[] {
 
 export function mapWarehouse(record: Record<string, unknown>): Warehouse {
   return {
-    id: pickString(record, ['id', '_id', 'warehouseId']),
+    id:
+      pickString(record, ['id', '_id', 'warehouseId']) ??
+      (pickNumber(record, ['id', 'warehouseId']) !== undefined
+        ? String(pickNumber(record, ['id', 'warehouseId']))
+        : undefined),
     name: pickString(record, ['name', 'warehouseName']),
     location: pickString(record, ['location', 'address', 'city']),
     capacity: pickNumber(record, ['capacity', 'maxCapacity']),
-    occupancy: pickNumber(record, ['occupancy', 'currentStock', 'utilization']),
-    temperatureZone: pickString(record, ['temperatureZone', 'zone']),
+    occupancy: pickNumber(record, [
+      'occupancy',
+      'currentStock',
+      'utilization',
+      'currentOccupancy',
+    ]),
+    temperatureZone: pickString(record, ['temperatureZone', 'zone', 'type']),
     status: pickString(record, ['status', 'state']),
     manager: pickString(record, ['manager', 'managerName']),
     contact: pickString(record, ['contact', 'phone', 'contactNumber']),
   }
 }
 
-export function mapInventoryItem(record: Record<string, unknown>): InventoryItem {
+export function mapInventoryItem(
+  record: Record<string, unknown>,
+): InventoryItem {
+  const storageRequirement = pickString(record, [
+    'storageRequirement',
+    'storage_requirement',
+    'requirement',
+  ])
+
   return {
-    id: pickString(record, ['id', '_id', 'itemId', 'inventoryId']),
+    id:
+      pickString(record, ['id', '_id', 'itemId', 'inventoryId']) ??
+      (pickNumber(record, ['id', 'itemId', 'inventoryId']) !== undefined
+        ? String(pickNumber(record, ['id', 'itemId', 'inventoryId']))
+        : undefined),
+    itemId: pickNumber(record, ['itemId', 'id']),
     name: pickString(record, ['name', 'itemName', 'productName']),
     sku: pickString(record, ['sku', 'code', 'itemCode']),
     category: pickString(record, ['category', 'type']),
-    isPerishable: pickBoolean(record, ['isPerishable', 'perishable']),
+    isPerishable:
+      pickBoolean(record, ['isPerishable', 'perishable']) ??
+      storageRequirement === 'COLD',
+    storageRequirement,
     quantity: pickNumber(record, ['quantity', 'qty', 'stock']),
     unit: pickString(record, ['unit', 'uom']),
     warehouseId: pickString(record, ['warehouseId', 'warehouse_id']),

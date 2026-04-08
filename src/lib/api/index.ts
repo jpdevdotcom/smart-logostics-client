@@ -1,12 +1,21 @@
 import { apiClient } from './client'
 import { endpoints } from './endpoints'
-import { isRecord, pickNumber, pickString } from './helpers'
+import {
+  isRecord,
+  mapApiList,
+  mapInventoryItem,
+  mapWarehouse,
+  pickNumber,
+  pickString,
+} from './helpers'
 import type {
   IntakeInput,
   InventoryItem,
+  ItemInput,
   Movement,
   TransferInput,
   Warehouse,
+  WarehouseInput,
 } from './types'
 
 type ReportItem = {
@@ -37,6 +46,13 @@ type InventoryReportApi = {
     totalWarehouses: number
     totalPages: number
   }
+}
+
+type ListMeta = {
+  page: number
+  limit: number
+  totalPages: number
+  totalCount?: number
 }
 
 export async function getInventoryReport(
@@ -82,6 +98,40 @@ export async function getInventoryReport(
   return { warehouses: mappedWarehouses, items, meta: report?.meta }
 }
 
+export async function getWarehouses(
+  page = 1,
+  limit = 10,
+): Promise<{
+  warehouses: Warehouse[]
+  meta: ListMeta
+}> {
+  const response = await apiClient.get(endpoints.warehouseById, {
+    params: { page, limit },
+  })
+
+  return {
+    warehouses: mapApiList(response.data, mapWarehouse),
+    meta: parseListMeta(response.data, page, limit),
+  }
+}
+
+export async function getItems(
+  page = 1,
+  limit = 10,
+): Promise<{
+  items: InventoryItem[]
+  meta: ListMeta
+}> {
+  const response = await apiClient.get(endpoints.itemById, {
+    params: { page, limit },
+  })
+
+  return {
+    items: mapApiList(response.data, mapInventoryItem),
+    meta: parseListMeta(response.data, page, limit),
+  }
+}
+
 export async function getMovements(): Promise<Movement[]> {
   return []
 }
@@ -102,6 +152,51 @@ export async function deleteWarehouse(id: number): Promise<void> {
   await apiClient.delete(`${endpoints.warehouseById}/${id}`, {
     suppressGlobalError: true,
   })
+}
+
+export async function createWarehouse(payload: WarehouseInput): Promise<void> {
+  await apiClient.post(endpoints.warehouseById, payload, {
+    suppressGlobalError: true,
+  })
+}
+
+export async function createItem(payload: ItemInput): Promise<void> {
+  await apiClient.post(endpoints.itemById, payload, {
+    suppressGlobalError: true,
+  })
+}
+
+function parseListMeta(
+  payload: unknown,
+  page: number,
+  limit: number,
+): ListMeta {
+  if (!isRecord(payload)) {
+    return { page, limit, totalPages: 1 }
+  }
+
+  const metaSource = isRecord(payload.meta)
+    ? payload.meta
+    : isRecord(payload.pagination)
+      ? payload.pagination
+      : payload
+
+  const currentPage = pickNumber(metaSource, ['page', 'currentPage']) ?? page
+  const currentLimit = pickNumber(metaSource, ['limit', 'pageSize']) ?? limit
+  const totalPages = pickNumber(metaSource, ['totalPages', 'pages']) ?? 1
+  const totalCount = pickNumber(metaSource, [
+    'totalCount',
+    'total',
+    'totalItems',
+    'totalWarehouses',
+  ])
+
+  return {
+    page: currentPage,
+    limit: currentLimit,
+    totalPages,
+    totalCount,
+  }
 }
 
 function parseReport(payload: unknown): InventoryReportApi | null {
@@ -180,4 +275,12 @@ function parseItem(record: Record<string, unknown>): ReportItem | null {
   }
 }
 
-export type { IntakeInput, InventoryItem, Movement, TransferInput, Warehouse }
+export type {
+  IntakeInput,
+  InventoryItem,
+  ItemInput,
+  Movement,
+  TransferInput,
+  Warehouse,
+  WarehouseInput,
+}

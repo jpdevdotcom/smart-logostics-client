@@ -50,3 +50,15 @@ export type IntakeInput = {
   itemId: number
   quantity: number
 }
+
+export type WarehouseInput = {
+  name: string
+  location: string
+  maxCapacity: number
+  type: string
+}
+
+export type ItemInput = {
+  name: string
+  storageRequirement: string
+}

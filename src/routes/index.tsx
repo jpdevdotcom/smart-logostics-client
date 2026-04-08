@@ -11,6 +11,7 @@ import {
   createIntake,
   createTransfer,
   getInventoryReport,
+  getItems,
   type InventoryItem,
   type Warehouse,
 } from '#/lib/api'
@@ -71,6 +72,7 @@ const initialIntakeState: IntakeFormState = {
 function App() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [inventory, setInventory] = useState<InventoryItem[]>([])
+  const [catalogItems, setCatalogItems] = useState<InventoryItem[]>([])
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [activityLog, setActivityLog] = useState<ActivityEntry[]>([])
@@ -115,10 +117,15 @@ function App() {
       if (isRefresh) {
         setRefreshing(true)
       }
-      const [{ warehouses: warehouseData, items: inventoryData }] =
-        await Promise.all([getInventoryReport(1, 50)])
+      const [inventoryReport, itemsResponse] = await Promise.all([
+        getInventoryReport(1, 50),
+        getItems(1, 100),
+      ])
+      const { warehouses: warehouseData, items: inventoryData } =
+        inventoryReport
       setWarehouses(warehouseData)
       setInventory(inventoryData)
+      setCatalogItems(itemsResponse.items)
       setLastUpdated(new Date().toLocaleString())
     } finally {
       setRefreshing(false)
@@ -150,32 +157,40 @@ function App() {
 
   const itemMap = useMemo(() => {
     const map = new Map<number, InventoryItem>()
-    inventory.forEach((item) => {
+    catalogItems.forEach((item) => {
       if (item.itemId === undefined) return
       if (!map.has(item.itemId)) {
         map.set(item.itemId, item)
       }
     })
     return map
-  }, [inventory])
+  }, [catalogItems])
 
   const itemOptions = useMemo(
     () =>
-      Array.from(itemMap.values()).map((item) => ({
-        value: String(item.itemId ?? ''),
-        label: item.name ?? 'Item',
-        keywords: `${item.sku ?? ''} ${item.name ?? ''} ${item.itemId ?? ''}`,
-      })),
+      Array.from(itemMap.values())
+        .sort((left, right) =>
+          compareNames(left.name ?? 'Item', right.name ?? 'Item'),
+        )
+        .map((item) => ({
+          value: String(item.itemId ?? ''),
+          label: item.name ?? 'Item',
+          keywords: `${item.sku ?? ''} ${item.name ?? ''} ${item.itemId ?? ''}`,
+        })),
     [itemMap],
   )
 
   const warehouseOptions = useMemo(
     () =>
-      warehouses.map((warehouse) => ({
-        value: warehouse.id ?? '',
-        label: warehouse.name ?? 'Warehouse',
-        keywords: `${warehouse.name ?? ''} ${warehouse.location ?? ''} ${warehouse.id ?? ''}`,
-      })),
+      [...warehouses]
+        .sort((left, right) =>
+          compareNames(left.name ?? 'Warehouse', right.name ?? 'Warehouse'),
+        )
+        .map((warehouse) => ({
+          value: warehouse.id ?? '',
+          label: warehouse.name ?? 'Warehouse',
+          keywords: `${warehouse.name ?? ''} ${warehouse.location ?? ''} ${warehouse.id ?? ''}`,
+        })),
     [warehouses],
   )
 
@@ -667,4 +682,11 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function isPositiveInt(value: number) {
   return Number.isInteger(value) && value > 0
+}
+
+function compareNames(left: string, right: string) {
+  return left.localeCompare(right, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  })
 }
